@@ -76,7 +76,7 @@ inline void D3D9Assert( HRESULT hr, const char *info )
 
 // Typedefs
 #define D3DX_FUNCTION(fn_name, fn_return, fn_args) \
-   typedef fn_return (WINAPI *D3DXFNPTR##fn_name##)##fn_args##;
+   typedef fn_return (WINAPI *D3DXFNPTR##fn_name)fn_args;
 #include "gfx/D3D9/d3dx9Functions.h"
 #undef D3DX_FUNCTION
 
@@ -298,10 +298,12 @@ public:
    virtual GFXVertexBuffer* allocVertexBuffer(  U32 numVerts, 
                                                 const GFXVertexFormat *vertexFormat,
                                                 U32 vertSize,
-                                                GFXBufferType bufferType );
+                                                GFXBufferType bufferType,
+                                                void* data = NULL );
    virtual GFXPrimitiveBuffer *allocPrimitiveBuffer(  U32 numIndices, 
                                                       U32 numPrimitives, 
-                                                      GFXBufferType bufferType );
+                                                      GFXBufferType bufferType,
+                                                      void* data = NULL );
    virtual void deallocVertexBuffer( GFXD3D9VertexBuffer *vertBuff );
    virtual GFXVertexDecl* allocVertexDecl( const GFXVertexFormat *vertexFormat );
    virtual void setVertexDecl( const GFXVertexDecl *decl );

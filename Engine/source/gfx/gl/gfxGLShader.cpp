@@ -664,10 +664,14 @@ void GFXGLShader::initHandles()
    glUseProgram(0);
 
    //instancing
+   if (!mInstancingFormat)
+      return;
+
    U32 offset = 0;
-   for ( U32 i=0; i < mInstancingFormat.getElementCount(); i++ )
+
+   for ( U32 i=0; i < mInstancingFormat->getElementCount(); i++ )
    {
-      const GFXVertexElement &element = mInstancingFormat.getElement( i );
+      const GFXVertexElement &element = mInstancingFormat->getElement( i );
       
       String constName = String::ToString( "$%s", element.getSemantic().c_str() );
 
@@ -702,9 +706,9 @@ void GFXGLShader::initHandles()
 
          // If this is a matrix we will have 2 or 3 more of these
          // semantics with the same name after it.
-         for ( ; i < mInstancingFormat.getElementCount(); i++ )
+         for ( ; i < mInstancingFormat->getElementCount(); i++ )
          {
-            const GFXVertexElement &nextElement = mInstancingFormat.getElement( i );
+            const GFXVertexElement &nextElement = mInstancingFormat->getElement( i );
             if ( nextElement.getSemantic() != element.getSemantic() )
             {
                i--;
@@ -951,13 +955,6 @@ bool GFXGLShader::_loadShaderFromStream(  GLuint shader,
    const char *versionDecl = "#version 150\r\n";
    buffers.push_back( dStrdup( versionDecl ) );
    lengths.push_back( dStrlen( versionDecl ) );
-
-   if(gglHasExtension(EXT_gpu_shader4))
-   {
-      const char *extension = "#extension GL_EXT_gpu_shader4 : enable\r\n";
-      buffers.push_back( dStrdup( extension ) );
-      lengths.push_back( dStrlen( extension ) );
-   }
 
    if(gglHasExtension(ARB_gpu_shader5))
    {

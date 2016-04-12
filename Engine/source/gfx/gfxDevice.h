@@ -302,6 +302,7 @@ protected:
    /// This will allow querying to see if a device is initialized and ready to
    /// have operations performed on it.
    bool mInitialized;
+   bool mReset;
 
    /// This is called before this, or any other device, is deleted in the global destroy()
    /// method. It allows the device to clean up anything while everything is still valid.
@@ -325,6 +326,10 @@ public:
    /// @see beginScene
    /// @see endScene
    bool canCurrentlyRender() const { return mCanCurrentlyRender; }
+
+   bool recentlyReset(){ return mReset; }
+   void beginReset(){ mReset = true; }
+   void finalizeReset(){ mReset = false; }
 
    void setAllowRender( bool render ) { mAllowRender = render; }
 
@@ -354,10 +359,10 @@ public:
    void setStereoEyeTransforms(MatrixF *transforms) { dMemcpy(mStereoEyeTransforms, transforms, sizeof(mStereoEyeTransforms)); dMemcpy(mInverseStereoEyeTransforms, transforms, sizeof(mInverseStereoEyeTransforms)); mInverseStereoEyeTransforms[0].inverse(); mInverseStereoEyeTransforms[1].inverse();  }
 
    /// Set the current eye offset used during stereo rendering. Assumes NumStereoPorts are available.
-   void setFovPort(const FovPort *ports) { dMemcpy(mFovPorts, ports, sizeof(mFovPorts)); }
+   void setStereoFovPort(const FovPort *ports) { dMemcpy(mFovPorts, ports, sizeof(mFovPorts)); }
 
    /// Get the current eye offset used during stereo rendering
-   const FovPort* getSteroFovPort() { return mFovPorts; }
+   const FovPort* getStereoFovPort() { return mFovPorts; }
 
    /// Sets stereo viewports
    void setSteroViewports(const RectI *ports) { dMemcpy(mStereoViewports, ports, sizeof(RectI) * NumStereoPorts); }
@@ -637,7 +642,8 @@ protected:
    virtual GFXVertexBuffer *allocVertexBuffer(  U32 numVerts, 
                                                 const GFXVertexFormat *vertexFormat, 
                                                 U32 vertSize, 
-                                                GFXBufferType bufferType ) = 0;
+                                                GFXBufferType bufferType,
+                                                void* data = NULL ) = 0;
 
    /// Called from GFXVertexFormat to allocate the hardware 
    /// specific vertex declaration for rendering.
@@ -674,7 +680,8 @@ protected:
    /// @note All index buffers use unsigned 16-bit indices.
    virtual GFXPrimitiveBuffer *allocPrimitiveBuffer(  U32 numIndices, 
                                                       U32 numPrimitives, 
-                                                      GFXBufferType bufferType ) = 0;
+                                                      GFXBufferType bufferType,
+                                                      void* data = NULL ) = 0;
 
    /// @}
 
@@ -901,8 +908,8 @@ public:
    /// because of the state caching stuff.
    /// @{
    void setLight(U32 stage, GFXLightInfo* light);
-   void setLightMaterial(GFXLightMaterial mat);
-   void setGlobalAmbientColor(ColorF color);
+   void setLightMaterial(const GFXLightMaterial& mat);
+   void setGlobalAmbientColor(const ColorF& color);
 
    /// @}
    

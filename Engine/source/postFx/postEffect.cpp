@@ -510,23 +510,23 @@ void PostEffect::_updateScreenGeometry(   const Frustum &frustum,
 
    PFXVertex *vert = outVB->lock();
 
-   vert->point.set( -1.0, -1.0, 0.0 );
-   vert->texCoord.set( 0.0f, 1.0f );
-   vert->wsEyeRay = frustumPoints[Frustum::FarBottomLeft] - cameraOffsetPos;
-   vert++;
-
-   vert->point.set( -1.0, 1.0, 0.0 );
-   vert->texCoord.set( 0.0f, 0.0f );
+   vert->point.set(-1.0, 1.0, 0.0);
+   vert->texCoord.set(0.0f, 0.0f);
    vert->wsEyeRay = frustumPoints[Frustum::FarTopLeft] - cameraOffsetPos;
    vert++;
 
-   vert->point.set( 1.0, 1.0, 0.0 );
-   vert->texCoord.set( 1.0f, 0.0f );
+   vert->point.set(1.0, 1.0, 0.0);
+   vert->texCoord.set(1.0f, 0.0f);
    vert->wsEyeRay = frustumPoints[Frustum::FarTopRight] - cameraOffsetPos;
    vert++;
 
-   vert->point.set( 1.0, -1.0, 0.0 );
-   vert->texCoord.set( 1.0f, 1.0f );
+   vert->point.set(-1.0, -1.0, 0.0);
+   vert->texCoord.set(0.0f, 1.0f);
+   vert->wsEyeRay = frustumPoints[Frustum::FarBottomLeft] - cameraOffsetPos;
+   vert++;
+
+   vert->point.set(1.0, -1.0, 0.0);
+   vert->texCoord.set(1.0f, 1.0f);
    vert->wsEyeRay = frustumPoints[Frustum::FarBottomRight] - cameraOffsetPos;
    vert++;
 
@@ -737,7 +737,7 @@ void PostEffect::_setupConstants( const SceneRenderState *state )
       mShaderConsts->set( mMatPrevScreenToWorldSC, tempMat );
    }
 
-   if ( mAmbientColorSC->isValid() )
+   if (mAmbientColorSC->isValid() && state)
    {
       const ColorF &sunlight = state->getAmbientLightColor();
       Point3F ambientColor( sunlight.red, sunlight.green, sunlight.blue );
@@ -811,14 +811,16 @@ void PostEffect::_setupConstants( const SceneRenderState *state )
                            lightDir.y * (6378.0f * 1000.0f),
                            lightDir.z * (6378.0f * 1000.0f) );
 
+         RectI viewPort = GFX->getViewport();
+
          // Get the screen space sun position.
-         MathUtils::mProjectWorldToScreen( lightPos, &sunPos, GFX->getViewport(), tmp, proj );
+         MathUtils::mProjectWorldToScreen(lightPos, &sunPos, viewPort, tmp, proj);
 
          // And normalize it to the 0 to 1 range.
-         sunPos.x -= (F32)GFX->getViewport().point.x;
-         sunPos.y -= (F32)GFX->getViewport().point.y;
-         sunPos.x /= (F32)GFX->getViewport().extent.x;
-         sunPos.y /= (F32)GFX->getViewport().extent.y;
+         sunPos.x -= (F32)viewPort.point.x;
+         sunPos.y -= (F32)viewPort.point.y;
+         sunPos.x /= (F32)viewPort.extent.x;
+         sunPos.y /= (F32)viewPort.extent.y;
 
          mShaderConsts->set( mScreenSunPosSC, Point2F( sunPos.x, sunPos.y ) );
       }
@@ -1273,7 +1275,7 @@ void PostEffect::process(  const SceneRenderState *state,
 
    // Draw it.
    GFX->setVertexBuffer( vb );
-   GFX->drawPrimitive( GFXTriangleFan, 0, 2 );
+   GFX->drawPrimitive( GFXTriangleStrip, 0, 2 );
 
    // Allow PostEffecVis to hook in.
    PFXVIS->onPFXProcessed( this );

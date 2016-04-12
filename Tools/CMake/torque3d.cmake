@@ -29,8 +29,8 @@ if(UNIX)
     #set(CXX_FLAG32 "-m32") #uncomment for build x32 on OSx64
     
     # default compiler flags
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAG32} -Wall -Wundef -msse -pipe -Wfatal-errors ${TORQUE_ADDITIONAL_LINKER_FLAGS} -Wl,-rpath,'$$ORIGIN'")
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CXX_FLAG32} -Wall -Wundef -msse -pipe -Wfatal-errors ${TORQUE_ADDITIONAL_LINKER_FLAGS} -Wl,-rpath,'$$ORIGIN'")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CXX_FLAG32} -Wundef -msse -pipe -Wfatal-errors ${TORQUE_ADDITIONAL_LINKER_FLAGS} -Wl,-rpath,'$$ORIGIN'")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CXX_FLAG32} -Wundef -msse -pipe -Wfatal-errors ${TORQUE_ADDITIONAL_LINKER_FLAGS} -Wl,-rpath,'$$ORIGIN'")
 
 	# for asm files
 	SET (CMAKE_ASM_NASM_OBJECT_FORMAT "elf")
@@ -64,7 +64,6 @@ option(TORQUE_EXTENDED_MOVE "Extended move support" OFF)
 mark_as_advanced(TORQUE_EXTENDED_MOVE)
 if(WIN32)
 	option(TORQUE_SDL "Use SDL for window and input" OFF)
-	mark_as_advanced(TORQUE_SDL)
 else()
 	set(TORQUE_SDL ON) # we need sdl to work on Linux/Mac
 endif()
@@ -81,6 +80,10 @@ if(WIN32)
 else()
 	set(TORQUE_OPENGL ON) # we need OpenGL to render on Linux/Mac
 	option(TORQUE_DEDICATED "Torque dedicated" OFF)
+endif()
+
+if(WIN32)
+	option(TORQUE_D3D11 "Allow Direct3D 11 render" OFF)
 endif()
 
 ###############################################################################
@@ -200,6 +203,7 @@ if( NOT TORQUE_DEDICATED )
 endif()
 addPath("${srcDir}/platform/test")
 addPath("${srcDir}/platform/threads")
+addPath("${srcDir}/platform/threads/test")
 addPath("${srcDir}/platform/async")
 addPath("${srcDir}/platform/async/test")
 addPath("${srcDir}/platform/input")
@@ -254,6 +258,10 @@ addPath("${srcDir}/T3D/sfx")
 addPath("${srcDir}/T3D/gameBase")
 addPath("${srcDir}/T3D/turret")
 addPath("${srcDir}/main/")
+addPath("${srcDir}/assets")
+addPath("${srcDir}/module")
+addPath("${srcDir}/T3D/assets")
+addPathRec("${srcDir}/persistence")
 addPathRec("${srcDir}/ts/collada")
 addPathRec("${srcDir}/ts/loader")
 addPathRec("${projectSrcDir}")
@@ -386,8 +394,9 @@ if(WIN32)
     addPath("${srcDir}/platformWin32/videoInfo")
     addPath("${srcDir}/platformWin32/minidump")
     addPath("${srcDir}/windowManager/win32")
-    #addPath("${srcDir}/gfx/D3D8")
-    addPath("${srcDir}/gfx/D3D")
+	if(TORQUE_D3D11)
+		addPath("${srcDir}/gfx/D3D11")
+	endif()
     addPath("${srcDir}/gfx/D3D9")
     addPath("${srcDir}/gfx/D3D9/pc")
     addPath("${srcDir}/shaderGen/HLSL")    
@@ -535,6 +544,13 @@ if(WIN32)
    
    if(TORQUE_OPENGL)
       addLib(OpenGL32.lib)
+   endif()
+		
+   # JTH: DXSDK is compiled with older runtime, and MSVC 2015+ is when __vsnprintf is undefined.
+   # This is a workaround by linking with the older legacy library functions.
+   # See this for more info: http://stackoverflow.com/a/34230122
+   if (MSVC14)
+      addLib(legacy_stdio_definitions.lib)
    endif()
 endif()
 

@@ -1293,7 +1293,7 @@ void Precipitation::interpolateTick(F32 delta)
 void Precipitation::processTick(const Move *)
 {
    //nothing to do on the server
-   if (isServerObject() || mDataBlock == NULL)
+   if (isServerObject() || mDataBlock == NULL || isHidden())
       return;
 
    const U32 currTime = Platform::getVirtualMilliseconds();
@@ -1557,7 +1557,7 @@ void Precipitation::renderObject(ObjectRenderInst *ri, SceneRenderState *state, 
    Point3F pos;
    VectorF orthoDir, velocity, right, up, rightUp(0.0f, 0.0f, 0.0f), leftUp(0.0f, 0.0f, 0.0f);
    F32 distance = 0;
-   GFXVertexPT* vertPtr = NULL;
+   GFXVertexPCT* vertPtr = NULL;
    const Point2F *tc;
 
    // Do this here and we won't have to in the loop!

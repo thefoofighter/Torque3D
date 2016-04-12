@@ -47,13 +47,13 @@ _D3DDECLTYPE GFXD3D9DeclType[GFXDeclType_COUNT];
 
 #define INIT_LOOKUPTABLE( tablearray, enumprefix, type ) \
    for( S32 i = enumprefix##_FIRST; i < enumprefix##_COUNT; i++ ) \
-      tablearray##[i] = (##type##)GFX_UNINIT_VAL;
+      tablearray[i] = (type)GFX_UNINIT_VAL;
 
 #define VALIDATE_LOOKUPTABLE( tablearray, enumprefix ) \
    for( S32 i = enumprefix##_FIRST; i < enumprefix##_COUNT; i++ ) \
-      if( (S32)tablearray##[i] == GFX_UNINIT_VAL ) \
+      if( (S32)tablearray[i] == GFX_UNINIT_VAL ) \
          Con::warnf( "GFXD3D9EnumTranslate: Unassigned value in " #tablearray ": %i", i ); \
-      else if( (S32)tablearray##[i] == GFX_UNSUPPORTED_VAL ) \
+      else if( (S32)tablearray[i] == GFX_UNSUPPORTED_VAL ) \
          Con::warnf( "GFXD3D9EnumTranslate: Unsupported value in " #tablearray ": %i", i );
 
 //------------------------------------------------------------------------------
@@ -114,6 +114,7 @@ void GFXD3D9EnumTranslate::init()
    GFXD3D9TextureFormat[GFXFormatD24S8] = D3DFMT_D24S8;
    GFXD3D9TextureFormat[GFXFormatD24FS8] = D3DFMT_D24FS8;
    GFXD3D9TextureFormat[GFXFormatD16] = D3DFMT_D16;
+   GFXD3D9TextureFormat[GFXFormatR8G8B8A8_SRGB] = D3DFMT_UNKNOWN;
    VALIDATE_LOOKUPTABLE( GFXD3D9TextureFormat, GFXFormat);
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
@@ -302,7 +303,6 @@ void GFXD3D9EnumTranslate::init()
    GFXD3D9PrimType[GFXLineStrip] = D3DPT_LINESTRIP;
    GFXD3D9PrimType[GFXTriangleList] = D3DPT_TRIANGLELIST;
    GFXD3D9PrimType[GFXTriangleStrip] = D3DPT_TRIANGLESTRIP;
-   GFXD3D9PrimType[GFXTriangleFan] = D3DPT_TRIANGLEFAN;
    VALIDATE_LOOKUPTABLE( GFXD3D9PrimType, GFXPT );
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
